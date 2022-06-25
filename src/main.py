@@ -31,6 +31,7 @@ def sitemap():
     return generate_sitemap(app)
 
 # INICIO PLANETS
+#  Listar los registros de planets en la base de datos
 @app.route('/planet', methods=['GET'])
 def get_planet():
 
@@ -39,26 +40,32 @@ def get_planet():
 
     return jsonify(all_planets), 200
 
+# Crear un nuevo planeta
 @app.route('/planet', methods=['POST'])
 def create_planet():
-
     body = request.get_json()
-    print(body)
     planet = Planet(name=body["name"], diameter=body["diameter"], rotation=body["rotation"], translation=body["translation"], gravity=body["gravity"])
     db.session.add(planet)
     db.session.commit()
-
     return jsonify(planet.serialize()), 201
 
+# Modificar un planeta
 @app.route('/planet/<int:planet_id>', methods=['PUT'])
 def refresh_planet(planet_id):
     planet = Planet.query.get(planet_id)
-    # if task is None:
-    #     raise APIException("Tarea no encontrada", 404)
+    if planet is None:
+        raise APIException("Planeta no encontrado", 404)
     body = request.get_json()
-    # if not ("done" in body):
-    #     raise APIException("Tarea no encontrada", 404)
-    # planet = Planet(name=body["name"], diameter=body["diameter"], rotation=body["rotation"], translation=body["translation"], gravity=body["gravity"])
+    if not ("name" in body):
+        raise APIException("keyError: name", 404)
+    if not ("diameter" in body):
+        raise APIException("keyError: diameter", 404)
+    if not ("rotation" in body):
+        raise APIException("keyError: rotation", 404)
+    if not ("translation" in body):
+        raise APIException("keyError: translation", 404)
+    if not ("gravity" in body):
+        raise APIException("keyError: gravity", 404)
 
     planet.name = body["name"]
     planet.diameter = body["diameter"]
@@ -69,24 +76,28 @@ def refresh_planet(planet_id):
     db.session.commit()
     return jsonify(planet.serialize())
 
+#  Listar la información de un solo planeta
 @app.route('/planet/<int:planet_id>', methods=['GET'])
 def get_detail_planet(planet_id):
     planet = Planet.query.get(planet_id)
-    # if task is None:
-    #     raise APIException("Tarea no encontrada", 404)
+    if planet is None:
+        raise APIException("Planeta no encontrada", 404)
     return jsonify(planet.serialize())
 
+# Borrar información de un solo planeta
 @app.route('/planet/<int:planet_id>', methods=['DELETE'])
 def delete_planet(planet_id):
     planet = Planet.query.get(planet_id)
-    # if task is None:
-    #     raise APIException("Tarea no encontrada", 404)
+    if planet is None:
+        raise APIException("Planeta no encontradO", 404)
     db.session.delete(planet)
     db.session.commit()
     return jsonify(planet.serialize())
 # FIN PLANETS
 
 # INICIO PERSONAJES
+
+# Listar todos los registros de prsonajes en la base de datos
 @app.route('/character', methods=['GET'])
 def get_characters():
 
@@ -95,44 +106,61 @@ def get_characters():
 
     return jsonify(all_characters), 200
 
+# Crear un nuevo personaje
 @app.route('/character', methods=['POST'])
 def create_character():
 
     body = request.get_json()
-    print(body)
     character = Character(name=body["name"], eye_color=body["eye_color"], birthday_date=body["birthday_date"], gender=body["gender"], height=body["height"])
     db.session.add(character)
     db.session.commit()
 
     return jsonify(character.serialize()), 201
 
+# Modificar un personaje
 @app.route('/character/<int:character_id>', methods=['PUT'])
 def refresh_character(character_id):
+    
     character = Character.query.get(character_id)
-    # if task is None:
-    #     raise APIException("Tarea no encontrada", 404)
+    if character is None:
+        raise APIException("Personaje no encontrado", 404)
     body = request.get_json()
-    # if not ("done" in body):
-    #     raise APIException("Tarea no encontrada", 404)
-    character = Character(name=body["name"], eye_color=body["eye_color"], birthday_date=body["birthday_date"], gender=body["gender"], height=body["height"])
+    if not ("name" in body):
+        raise APIException("keyError: name", 404)
+    if not ("eye_color" in body):
+        raise APIException("keyError: eye_color", 404)
+    if not ("birthday_date" in body):
+        raise APIException("keyError: birthday_date", 404)
+    if not ("gender" in body):
+        raise APIException("keyError: gender", 404)
+    if not ("height" in body):
+        raise APIException("keyError: height", 404)
+    
+    character.name = body["name"]
+    character.eye_color = body["eye_color"]
+    character.birthday_date = body["birthday_date"]
+    character.gender = body["gender"]
+    character.height = body["height"]
     db.session.commit()
     return jsonify(character.serialize()), 200
 
+# Obtener un solo personaje
 @app.route('/character/<int:character_id>', methods=['GET'])
 def get_detail_character(character_id):
     character = Character.query.get(character_id)
-    # if task is None:
-    #     raise APIException("Tarea no encontrada", 404)
+    if character is None:
+        raise APIException("Personaje no encontrado", 404)
     return jsonify(character.serialize()),200
 
+# Eliminar un solo personaje
 @app.route('/character/<int:character_id>', methods=['DELETE'])
 def delete_character(character_id):
     character = Character.query.get(character_id)
-    # if task is None:
-    #     raise APIException("Tarea no encontrada", 404)
+    if character is None:
+        raise APIException("Personaje no encontrado", 404)
     db.session.delete(character)
     db.session.commit()
-    return jsonify(character.serialize()),200
+    return jsonify("Personaje eliminado", character.serialize()),200
 # # FIN PERSONAJES
 
 # INICIO USUARIOs
@@ -148,7 +176,6 @@ def get_all_users():
 def create_user():
    
     body = request.get_json()
-    print(body)
     user = User(email=body["email"], is_active=True, password="****")
     db.session.add(user)
     db.session.commit()
@@ -165,24 +192,46 @@ def get_user(user_id):
 
 # INICIO FAVORITOS
 # Obtener favoritos
-@app.route('/user/<int:user_id>/favorites', methods=['GET'])
-def get_user_favorites(user_id):
+@app.route('/user/favorites', methods=['GET'])
+def get_user_favorites():
     favorites = Favorite.query.all()
     all_favorites = list(map(lambda favorite: favorite.serialize(), favorites))
 
     return jsonify(all_favorites), 200
 
-# Añadir favoritos
-@app.route('/user/<int:user_id>/favorites/planet', methods=['POST'])
-def add_user_favorites(user_id):
-body = request.get_json()
-    print("favoritos body")
-    print(body)
-    favorite_planet = Favorite(planet_id=body["planet_id"], user_id=body["user_id"])
+# Añadir un nuevo planeta favorito al usuario actual
+@app.route('/favorites/planet/<int:planet_id>', methods=['POST'])
+def add_favorite_planet(planet_id):
+    body = request.get_json()
+    favorite_planet = Favorite(user_id=body["user_id"], planet_id=planet_id)
     db.session.add(favorite_planet)
     db.session.commit()
+    return jsonify("Planeta favorito añadido"), 201
 
-    return jsonify(favorite_planet.serialize()), 201
+# Añadir un nuevo personaje favorito al usuario actual
+@app.route('/favorites/character/<int:character_id>', methods=['POST'])
+def add_favorite_character(character_id):
+    body = request.get_json()
+    favorite_character = Favorite(user_id=body["user_id"], character_id=character_id)
+    # if character_id is None:
+    #     raise APIException("Personaje no encontrado", 404)
+    db.session.add(favorite_character)
+    db.session.commit()
+    return jsonify("Personaje favorito añadido"), 201
+
+# Eliminar un nuevo planeta favorito al usuario actual
+@app.route('/favorites/planet/<int:planet_id>',methods=['DELETE'])
+def delete_favorite_planet(planet_id):
+    Favorite.query.filter(Favorite.planet_id == planet_id).delete()
+    db.session.commit()
+    return jsonify("Planeta favorito eliminado"),200
+
+# Eliminar un nuevo personaje favorito al usuario actual
+@app.route('/favorites/character/<int:character_id>',methods=['DELETE'])
+def delete_favorite_character(character_id):
+    Favorite.query.filter(Favorite.character_id == character_id).delete()
+    db.session.commit()
+    return jsonify("Personaje favorito eliminado"),200
 # FIN FAVORITOS
 
 # this only runs if `$ python src/main.py` is executed
