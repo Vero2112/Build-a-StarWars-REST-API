@@ -81,7 +81,7 @@ def refresh_planet(planet_id):
 def get_detail_planet(planet_id):
     planet = Planet.query.get(planet_id)
     if planet is None:
-        raise APIException("Planeta no encontrada", 404)
+        raise APIException("Planeta no encontrado", 404)
     return jsonify(planet.serialize())
 
 # Borrar información de un solo planeta
@@ -89,7 +89,7 @@ def get_detail_planet(planet_id):
 def delete_planet(planet_id):
     planet = Planet.query.get(planet_id)
     if planet is None:
-        raise APIException("Planeta no encontradO", 404)
+        raise APIException("Planeta no encontrado", 404)
     db.session.delete(planet)
     db.session.commit()
     return jsonify(planet.serialize())
@@ -163,7 +163,8 @@ def delete_character(character_id):
     return jsonify("Personaje eliminado", character.serialize()),200
 # # FIN PERSONAJES
 
-# INICIO USUARIOs
+# INICIO USUARIOS
+# Obtener todos los usuarios
 @app.route('/user', methods=['GET'])
 def get_all_users():
 
@@ -172,16 +173,18 @@ def get_all_users():
 
     return jsonify(all_users), 200
 
-@app.route('/user/register', methods=['POST'])
+# Crear usuario
+@app.route('/user/signup', methods=['POST'])
 def create_user():
    
     body = request.get_json()
-    user = User(email=body["email"], is_active=True, password="****")
+    user = User(email=body["email"], is_active=True, password=body["password"]) 
     db.session.add(user)
     db.session.commit()
 
     return jsonify(user.serialize()), 201
 
+# Obtener detalle de un sólo usuario
 @app.route('/user/<int:user_id>', methods=['GET'])
 def get_user(user_id):
     user = User.query.get(user_id)
